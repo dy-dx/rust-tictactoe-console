@@ -1,6 +1,9 @@
 use std::io;
 
 fn main() {
+
+    let board: [[char; 3]; 3] = [[' '; 3]; 3];
+
     println!("Please enter a move:");
 
     let mut input = String::new();
