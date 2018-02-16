@@ -41,13 +41,15 @@ fn get_input(prompt: &str) -> Result<usize, String> {
     }
 }
 
-fn player_turn(player: i32, board: &mut [[&str; 3]]) -> bool {
-    let player_string = match player {
+fn player_to_string(player: u16) -> &'static str {
+    match player {
         0 => "X",
         _ => "O",
-    };
+    }
+}
 
-    println!("Please enter a move for player {}.", player_string);
+fn player_turn(player: &'static str, board: &mut [[&str; 3]]) -> bool {
+    println!("Please enter a move for player {}.", player);
 
     let row_index = match get_input("Row (0, 1, 2): ") {
         Ok(n) => n,
@@ -63,17 +65,17 @@ fn player_turn(player: i32, board: &mut [[&str; 3]]) -> bool {
         return false;
     }
 
-    board[row_index][col_index] = player_string;
+    board[row_index][col_index] = player;
     return true;
 }
 
 fn main() {
     let mut board: [[&str; 3]; 3] = [[""; 3]; 3];
-    let mut current_player = 0;
+    let mut current_player: u16 = 0;
 
     loop {
         draw(&board);
-        match player_turn(current_player, &mut board) {
+        match player_turn(player_to_string(current_player), &mut board) {
             true => current_player = 1 - current_player,
             false => println!("Try again."),
         };
