@@ -9,15 +9,24 @@ fn draw(board: &[[&str; 3]]) {
 }
 
 fn display_cell(val: &str) -> &str {
-    if val == "" { " " } else { val }
+    if val == "" {
+        " "
+    } else {
+        val
+    }
 }
 
 fn display_row(row: &[&str]) -> String {
-    format!("| {} |", row.iter().map(|&x| display_cell(x)).collect::<Vec<&str>>().join(" | "))
+    format!(
+        "| {} |",
+        row.iter()
+            .map(|&x| display_cell(x))
+            .collect::<Vec<&str>>()
+            .join(" | ")
+    )
 }
 
 fn main() {
-
     let board: [[&str; 3]; 3] = [[""; 3]; 3];
     draw(&board);
 
@@ -27,6 +36,6 @@ fn main() {
 
     match io::stdin().read_line(&mut input) {
         Ok(_) => println!("You entered: {}", input.trim()),
-        Err(error) => println!("error: {}", error)
+        Err(error) => println!("error: {}", error),
     }
 }
