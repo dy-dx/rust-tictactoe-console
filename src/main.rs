@@ -48,36 +48,113 @@ fn player_to_string(player: u16) -> &'static str {
     }
 }
 
-fn player_turn(player: &'static str, board: &mut [[&str; 3]]) -> bool {
-    println!("Please enter a move for player {}.", player);
-
-    let row_index = match get_input("Row (0, 1, 2): ") {
-        Ok(n) => n,
-        _ => return false,
-    };
-
-    let col_index = match get_input("Col (0, 1, 2): ") {
-        Ok(n) => n,
-        _ => return false,
-    };
-
-    if row_index > 2 || col_index > 2 || board[row_index][col_index] != "" {
-        return false;
+fn is_direction_filled(player: &'static str, list: Vec<&str>) -> bool {
+    let mut is_filled = true;
+    for i in 0..list.len() {
+        if &list[i] != &player {
+            is_filled = false;
+        }
     }
-
-    board[row_index][col_index] = player;
-    return true;
+    return is_filled;
 }
 
-fn main() {
-    let mut board: [[&str; 3]; 3] = [[""; 3]; 3];
-    let mut current_player: u16 = 0;
+fn did_player_win(player: &'static str, board: &mut [[&str; 3]]) -> bool {
+    for i in 0..board.len() {
+        // check row i
+        let row = board[i].to_vec();
+        if is_direction_filled(player, row) {
+            return true;
+        }
+
+        // check col i
+        let col = board.iter().map(|&r| r[i]).collect::<Vec<&str>>();
+        if is_direction_filled(player, col) {
+            return true;
+        }
+    }
+
+    // check ↘ diagonals
+    let mut i = 0;
+    let diagonals = board
+        .iter()
+        .map(|&r| {
+            let cell = r[i];
+            i += 1;
+            cell
+        })
+        .collect::<Vec<&str>>();
+
+    if is_direction_filled(player, diagonals) {
+        return true;
+    }
+
+    // check ↙ diagonals
+    i = board.len();
+    let reverse_diagonals = board
+        .iter()
+        .map(|&r| {
+            i -= 1;
+            r[i]
+        })
+        .collect::<Vec<&str>>();
+
+    if is_direction_filled(player, reverse_diagonals) {
+        return true;
+    }
+
+    return false;
+}
+
+fn player_turn(player: &'static str, board: &mut [[&str; 3]]) -> bool {
+    let mut row_index;
+    let mut col_index;
 
     loop {
         draw(&board);
-        match player_turn(player_to_string(current_player), &mut board) {
-            true => current_player = 1 - current_player,
-            false => println!("Try again."),
+        println!("Please enter a move for player {}.", player);
+
+        row_index = match get_input("Row (0, 1, 2): ") {
+            Ok(n) => n,
+            _ => {
+                println!("Try again.");
+                continue;
+            }
         };
+
+        col_index = match get_input("Col (0, 1, 2): ") {
+            Ok(n) => n,
+            _ => continue,
+        };
+
+        if row_index > 2 || col_index > 2 || board[row_index][col_index] != "" {
+            println!("Try again.");
+            continue;
+        }
+
+        break;
+    }
+
+    board[row_index][col_index] = player;
+    return did_player_win(player, board);
+}
+
+fn main() {
+    let mut board: [[&str; 3]; 3];
+    let mut current_player: u16;
+
+    loop {
+        board = [[""; 3]; 3];
+        current_player = 0;
+
+        loop {
+            match player_turn(player_to_string(current_player), &mut board) {
+                false => current_player = 1 - current_player,
+                true => {
+                    draw(&board);
+                    println!("You win!");
+                    break;
+                }
+            };
+        }
     }
 }
