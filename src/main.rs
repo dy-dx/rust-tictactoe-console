@@ -58,6 +58,17 @@ fn is_direction_filled(player: &'static str, list: Vec<&str>) -> bool {
     return is_filled;
 }
 
+fn is_stalemate(board: &[[&str; 3]]) -> bool {
+    for i in 0..board.len() {
+        for j in 0..board[i].len() {
+            if board[i][j] == "" {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 fn did_player_win(player: &'static str, board: &mut [[&str; 3]]) -> bool {
     for i in 0..board.len() {
         // check row i
@@ -139,22 +150,22 @@ fn player_turn(player: &'static str, board: &mut [[&str; 3]]) -> bool {
 }
 
 fn main() {
-    let mut board: [[&str; 3]; 3];
-    let mut current_player: u16;
-
     loop {
-        board = [[""; 3]; 3];
-        current_player = 0;
+        let mut board = [[""; 3]; 3];
+        let mut current_player = 0;
 
         loop {
-            match player_turn(player_to_string(current_player), &mut board) {
-                false => current_player = 1 - current_player,
-                true => {
-                    draw(&board);
-                    println!("You win!");
+            if player_turn(player_to_string(current_player), &mut board) {
+                draw(&board);
+                println!("You win!");
+                break;
+            } else {
+                if is_stalemate(&board) {
+                    println!("Stalemate!");
                     break;
-                }
-            };
+                };
+                current_player = 1 - current_player
+            }
         }
     }
 }
